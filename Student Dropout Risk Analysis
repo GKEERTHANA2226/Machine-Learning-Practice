@@ -1,0 +1,109 @@
+import pandas as pd
+
+
+def load_data(file_path: str) -> pd.DataFrame:
+    """Load the dataset from a CSV file.
+
+    Args:
+        file_path (str): Path to the CSV file.
+
+    Returns:
+        pd.DataFrame: The loaded DataFrame.
+    """
+    df = pd.read_csv(file_path)
+    return df
+
+
+def explore_data(df: pd.DataFrame):
+    """Perform basic data exploration, printing key details about the dataset.
+
+    Args:
+        df (pd.DataFrame): The DataFrame to explore.
+    """
+    print("Dataset Shape:", df.shape)
+    print("\nData Types:")
+    print(df.dtypes)
+    print("\nMissing Values:")
+    print(df.isnull().sum())
+
+    print("\nGender Distribution:")
+    print(df["Gender"].value_counts())
+
+    print("\nCourse Distribution:")
+    print(df["Course"].value_counts())
+
+    print("\nTuition Fees Up to Date Distribution:")
+    print(df["Tuition fees up to date"].value_counts())
+
+    print("\nDebtor Distribution:")
+    print(df["Debtor"].value_counts())
+
+
+def create_approval_rate(df: pd.DataFrame) -> pd.DataFrame:
+    """Create the 'approval_rate' feature based on 'Curricular units 1st sem (approved)'
+    and 'Curricular units 1st sem (enrolled)' columns.
+
+    Args:
+        df (pd.DataFrame): The DataFrame with student data.
+
+    Returns:
+        pd.DataFrame: DataFrame with the 'approval_rate' column.
+    """
+    df["approval_rate"] = (
+        df["Curricular units 1st sem (approved)"]
+        / df["Curricular units 1st sem (enrolled)"]
+    )
+    return df
+
+
+def create_performance_score(df: pd.DataFrame) -> pd.DataFrame:
+    """Create the 'performance_score' feature based on 'Curricular units 1st sem (approved)'
+    and 'Curricular units 1st sem (evaluations)' columns.
+
+    Args:
+        df (pd.DataFrame): The DataFrame with student data.
+
+    Returns:
+        pd.DataFrame: DataFrame with the 'performance_score' column.
+    """
+    df["performance_score"] = (
+        df["Curricular units 1st sem (approved)"]
+        / df["Curricular units 1st sem (evaluations)"]
+    )
+    return df
+
+
+def create_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
+    """Create all engineered features needed for the analysis.
+
+    Args:
+        df (pd.DataFrame): The DataFrame with student data.
+
+    Returns:
+        pd.DataFrame: DataFrame with engineered features.
+    """
+    df = create_approval_rate(df)
+    df = create_performance_score(df)
+
+    print("\nData with new columns: ")
+    print(df[["Course", "Gender", "approval_rate", "performance_score"]].head())
+
+    return df
+
+
+import os
+
+if __name__ == "__main__":
+    # Check if dataset file exists or locate it in current workspace
+    file_path = "data.csv"
+    if not os.path.exists(file_path):
+        # Alternative common relative locations
+        possible_paths = ["data/data.csv", "../data.csv", "dataset.csv"]
+        for path in possible_paths:
+            if os.path.exists(path):
+                file_path = path
+                break
+
+    df = load_data(file_path)
+    explore_data(df)
+    df = create_engineered_features(df)
